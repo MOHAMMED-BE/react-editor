@@ -1,0 +1,32 @@
+{
+  "name": "@mbs-dev/react-editor",
+  "version": "1.0.0",
+  "description": "react editor",
+  "main": "dist/index.js",
+  "types": "types/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MOHAMMED-BE/react-editor.git"
+  },
+  "keywords": [
+    "react"
+  ],
+  "author": "MOHAMMED BEN-SEGHIR",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MOHAMMED-BE/react-editor/issues"
+  },
+  "homepage": "https://github.com/MOHAMMED-BE/react-editor#readme",
+  "devDependencies": {
+    "@types/react": "^18.2.60",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "jodit-react": "^4.0.15",
+    "react": "^18.2.0"
+  }
+}

@@ -1,0 +1,1 @@
+declare module '@mbs-dev/react-editor';
