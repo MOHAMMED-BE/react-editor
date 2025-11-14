@@ -7,3 +7,4 @@ export interface EditorProps {
     imageUrl?: string;
     config?: any;
 }
+export type OnDeleteImage = (src: string) => void | Promise<void>;
