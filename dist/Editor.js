@@ -57,6 +57,25 @@ var ReactEditor = function (_a) {
     var onChange = _a.onChange, onBlur = _a.onBlur, value = _a.value, config = _a.config;
     return (react_1.default.createElement(jodit_react_1.default, { value: value, config: config, onBlur: onBlur, onChange: onChange }));
 };
+var isImageByExtension = function (filename, imageExts) {
+    var _a, _b;
+    var clean = (_b = (_a = (filename || '').split('?')[0]) === null || _a === void 0 ? void 0 : _a.split('#')[0]) !== null && _b !== void 0 ? _b : '';
+    var ext = (clean.split('.').pop() || '').toLowerCase();
+    return !!ext && imageExts.includes(ext);
+};
+var getDisplayNameFromPath = function (filename) {
+    var _a, _b;
+    var clean = (_b = (_a = (filename || '').split('?')[0]) === null || _a === void 0 ? void 0 : _a.split('#')[0]) !== null && _b !== void 0 ? _b : '';
+    var last = clean.split('/').pop();
+    var base = last ? decodeURIComponent(last) : filename;
+    var dotIndex = base.lastIndexOf('.');
+    var noExt = dotIndex > 0 ? base.slice(0, dotIndex) : base;
+    var dashIndex = noExt.lastIndexOf('-');
+    if (dashIndex > 0) {
+        return noExt.slice(0, dashIndex);
+    }
+    return noExt;
+};
 var uploaderConfig = function (apiUrl, imageUrl) { return ({
     imagesExtensions: ['jpg', 'png', 'jpeg', 'gif', 'webp'],
     filesVariableName: function (t) {
@@ -70,15 +89,27 @@ var uploaderConfig = function (apiUrl, imageUrl) { return ({
         return formdata;
     },
     isSuccess: function (e) {
+        var _this = this;
         var _a;
         var fn = this.jodit;
         if (((_a = e === null || e === void 0 ? void 0 : e.data) === null || _a === void 0 ? void 0 : _a.files) && e.data.files.length) {
-            var tagName_1 = 'img';
             e.data.files.forEach(function (filename) {
-                var elm = fn.createInside.element(tagName_1);
                 var src = imageUrl ? "".concat(imageUrl, "/").concat(filename) : filename;
-                elm.setAttribute('src', src);
-                fn.s.insertImage(elm, null, fn.o.imageDefaultWidth);
+                if (isImageByExtension(filename, _this.imagesExtensions || ['jpg', 'png', 'jpeg', 'gif', 'webp'])) {
+                    var tagName = 'img';
+                    var elm = fn.createInside.element(tagName);
+                    elm.setAttribute('src', src);
+                    fn.s.insertImage(elm, null, fn.o.imageDefaultWidth);
+                }
+                else {
+                    var tagName = 'a';
+                    var elm = fn.createInside.element(tagName);
+                    elm.setAttribute('href', src);
+                    elm.setAttribute('target', '_blank');
+                    elm.setAttribute('rel', 'noopener noreferrer');
+                    elm.textContent = getDisplayNameFromPath(filename);
+                    fn.s.insertNode(elm);
+                }
             });
         }
         return !!(e === null || e === void 0 ? void 0 : e.success);
@@ -132,6 +163,7 @@ var config = function (_a) {
             'ol',
             '|',
             'image',
+            'file',
             '|',
             'video',
             '|',

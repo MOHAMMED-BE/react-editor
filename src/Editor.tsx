@@ -13,6 +13,32 @@ const ReactEditor: React.FC<EditorProps> = ({ onChange, onBlur, value, config })
     );
 };
 
+const isImageByExtension = (filename: string, imageExts: string[]): boolean => {
+    const clean = (filename || '').split('?')[0]?.split('#')[0] ?? '';
+    const ext = (clean.split('.').pop() || '').toLowerCase();
+    return !!ext && imageExts.includes(ext);
+};
+
+// ✅ UPDATED: for files, display name without extension and without last "-..."
+// Example: recu-202600004-2-69956651a3b98099024323.pdf -> recu-202600004-2
+const getDisplayNameFromPath = (filename: string): string => {
+    const clean = (filename || '').split('?')[0]?.split('#')[0] ?? '';
+    const last = clean.split('/').pop();
+    const base = last ? decodeURIComponent(last) : filename;
+
+    // remove extension
+    const dotIndex = base.lastIndexOf('.');
+    const noExt = dotIndex > 0 ? base.slice(0, dotIndex) : base;
+
+    // remove last "-..." suffix
+    const dashIndex = noExt.lastIndexOf('-');
+    if (dashIndex > 0) {
+        return noExt.slice(0, dashIndex);
+    }
+
+    return noExt;
+};
+
 /**
  * Uploader configuration for Jodit
  * Handles image upload + insertion in the editor
@@ -36,13 +62,24 @@ export const uploaderConfig = (
         const fn = this.jodit;
 
         if (e?.data?.files && e.data.files.length) {
-            const tagName = 'img';
-
             e.data.files.forEach((filename: string) => {
-                const elm = fn.createInside.element(tagName);
                 const src = imageUrl ? `${imageUrl}/${filename}` : filename;
-                elm.setAttribute('src', src);
-                fn.s.insertImage(elm as HTMLImageElement, null, fn.o.imageDefaultWidth);
+
+                // ✅ If it's an image => insert <img>, otherwise insert <a href="...">
+                if (isImageByExtension(filename, this.imagesExtensions || ['jpg', 'png', 'jpeg', 'gif', 'webp'])) {
+                    const tagName = 'img';
+                    const elm = fn.createInside.element(tagName);
+                    elm.setAttribute('src', src);
+                    fn.s.insertImage(elm as HTMLImageElement, null, fn.o.imageDefaultWidth);
+                } else {
+                    const tagName = 'a';
+                    const elm = fn.createInside.element(tagName);
+                    elm.setAttribute('href', src);
+                    elm.setAttribute('target', '_blank');
+                    elm.setAttribute('rel', 'noopener noreferrer');
+                    elm.textContent = getDisplayNameFromPath(filename);
+                    fn.s.insertNode(elm);
+                }
             });
         }
 
@@ -116,6 +153,7 @@ export const config = ({
             'ol',
             '|',
             'image',
+            'file',
             '|',
             'video',
             '|',
