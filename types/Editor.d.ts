@@ -1,7 +1,10 @@
 import React from 'react';
 import { EditorProps } from './Editor.types';
 declare const ReactEditor: React.FC<EditorProps>;
-export declare const uploaderConfig: (apiUrl?: string, imageUrl?: string) => {
+type SelectionRef = {
+    current: Range | null;
+};
+export declare const uploaderConfig: (apiUrl?: string, imageUrl?: string, selectionRef?: SelectionRef) => {
     imagesExtensions: string[];
     filesVariableName(t: number): string;
     url: string | undefined;
@@ -25,5 +28,5 @@ type ConfigParams = {
     imageUrl?: string;
     onDeleteImage?: (imageUrl: string) => void | Promise<void>;
 };
-export declare const config: ({ includeUploader, apiUrl, imageUrl, onDeleteImage, }?: ConfigParams) => any;
+export declare const config: ({ includeUploader, apiUrl, imageUrl, onDeleteImage }?: ConfigParams) => any;
 export default ReactEditor;
